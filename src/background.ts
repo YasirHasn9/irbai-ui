@@ -5,14 +5,13 @@
 // the content and popup and within itself as well as the passing messages, tab control and chrome storage -- awesome
 
 // 1. listen when the extension is installed 
-
-
 chrome.runtime.onInstalled.addListener(() => {
     console.log("Extension is installed")
 })
 
 // 2. Listen to the messages from content and the popup 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    console.log("Before handling")
     if (message.type === "Scrape_Job") {
         console.log("Received job scrape request")
 
@@ -20,6 +19,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         return true // indicate that we will response asynchronously
 
     }
+
+    console.log("After handling")
 
     return false
 })
