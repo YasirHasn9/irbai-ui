@@ -1,14 +1,41 @@
-// From here we send messages to the background 
+// I want to store the user selection for later use.
+let selectedText = ''
 
+// listen for text selection
+document.addEventListener('selectionchange', () => {
+  selectedText = window.getSelection()?.toString().trim() || ''
+})
 
-// for now we are gonna assume the jobData is
-const jobData = {
-    title: "Software engineer",
-    description: "Responsible to do a lot of things with shitty pay",
-    requirements: ["React", "Js", "has no life"]
+// I want to retrieves the html of selected text
+function getSelectionHTML() {
+  const selection = window.getSelection()
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0)
+    const clonedSelection = range.cloneContents()
+    const div = document.createElement('div')
+    div.appendChild(clonedSelection)
+    return div.innerHTML
+  }
+  return ''
 }
 
-chrome.runtime.sendMessage({ type: "Scrape_Job", data: jobData }).then((res) => {
+// I want to send the data to background
+function sendScarpedData(data: any) {
+  chrome.runtime.sendMessage({ type: "SCRAPED_JOB_DATA", data })
+}
 
-    console.log("Response from the background", res)
+
+// listen for messages from the background script
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (msg.type === "GET_SELECTED_JOB_INFO") {
+    const selectedHTML = getSelectionHTML()
+    sendScarpedData({
+      text: selectedText,
+      html: selectedHTML
+    })
+    sendResponse({ success: true })
+  }
 })
+
+// add a context menu item 
+chrome.runtime.sendMessage({ type: "ADD_CONTEXT_MENU" })

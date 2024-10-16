@@ -28,6 +28,7 @@ export default defineConfig({
           return "[name].js"
         }
       }
-    }
+    },
+    outDir: "dist"
   }
 })

@@ -1,36 +1,112 @@
-// This code the service worker in the Manifest V3
-// It operates independently
-// It listens for event and messages from the content
-// Handle the background tasks for the extension -  simply this file gonna work as a middleman between
+// The background script is essential for managing tasks that need to run in the background, such as handling messages from content scripts and responding to extension events (e.g., installation).
+// Simply this file gonna work as a middleman between
 // the content and popup and within itself as well as the passing messages, tab control and chrome storage -- awesome
 
-// 1. listen when the extension is installed 
+// This is the lifecycle of the extension - like the time is is installed or the time it listened to some event
 chrome.runtime.onInstalled.addListener(() => {
     console.log("Extension is installed")
+    chrome.contextMenus.create({
+        id: "sendSelectedJobInfo",
+        title: "send selected job info",
+        contexts: ['selection']
+    })
 })
 
-// 2. Listen to the messages from content and the popup 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    console.log("Before handling")
-    if (message.type === "Scrape_Job") {
-        console.log("Received job scrape request")
-
-        handleJobScrape(message.data).then(res => sendResponse(res))
-        return true // indicate that we will response asynchronously
-
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === "sendSelectedJobInfo" && tab?.id) {
+        chrome.tabs.sendMessage(tab.id, { action: "GET_SELECTED_JOB_INFO" })
     }
-
-    console.log("After handling")
-
-    return false
 })
 
-async function handleJobScrape(data: any) {
-    console.log("This is from the handle job scrape  function: ", data)
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg.type === "SCRAPED_JOB_DATA") {
+        handleJobScrape(msg.data).then(res => sendResponse(res))
+        return true
+    }
+})
 
-    // to store smt in the chrome storage 
-    // chrome.storage.local.set({ jobData: data })
+// Basically, here we are gonna handle the messages from content
+async function handleJobScrape(data: any) {
+    chrome.storage.local.set({ jobData: data })
 
     // return something to the sender 
     return { success: true, message: "Job data processed and stored successfully" }
 }
+
+
+
+// /*
+// message depends on whatever object the chrome.runtime.sendMessage({object}) is sending from the content.ts
+// message = {
+//     type: "String",
+//     data: (Whatever the the data is going to be (maybe the scraped data))
+// }
+// */
+
+
+// /*
+// sender_or_tab =
+// {
+//     documentId: "",
+//     id: "",
+//     documentLifeCycle: "",
+//     framedId: 0 -> number,
+//     origin: "The base url for that website",
+//     url: "the whole url of the webpage",
+//     tab: {
+//         active: boolean,
+//         audible: boolean,
+//         autoDiscardable: boolean,
+//         discarded: bool,
+//         favIconUrl: "has the website icon",
+//         groupId: number,
+//         height: number,
+//         highlighted: bool,
+//         id: number,
+//         incognito: bool,
+//         index: number,
+//         lastAccessed: number (maybe indicates a date),
+//         mutedInfo: {
+//             muted: bool
+//             },
+//         pinned: bool,
+//         selected: bool,
+//         status: string(I think it is enum with fixed values),
+//         title: string (I think this is the name of the website),
+//         url: "the whole url",
+//         width: number -> maybe this is the size of the webpage,
+// }
+// */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

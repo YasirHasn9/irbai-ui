@@ -37,7 +37,7 @@ const Popup: React.FC = () => {
 
 
 
-    return <div style={{ padding: "16px", width: "300px" }}>
+    return <div style={{ padding: "16px", width: "600px", background: "skyblue" }}>
         <h2>Add your skill</h2>
         <input type="text" value={input} onChange={handleInputChange} onKeyDown={handleKeyPress} placeholder="Type a skill and press enter" />
 

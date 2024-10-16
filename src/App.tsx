@@ -1,5 +1,5 @@
 import React from "react"
-import Popup from "./popup/Popup"
+import Popup from "./components/popup/Popup"
 const App: React.FC = () => {
     return <div>
         <Popup />
